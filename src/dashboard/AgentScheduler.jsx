@@ -150,5 +150,4 @@ const AgentScheduler = () => {
     </div>
   );
 };
-
 export default AgentScheduler;

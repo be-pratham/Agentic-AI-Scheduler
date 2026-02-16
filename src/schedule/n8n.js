@@ -1,4 +1,4 @@
-const N8N_WEBHOOK_URL = VITE_N8N_URL;
+const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_URL;
 export const callN8nAgent = async (input, currentSchedule = [], conversationHistory = []) => {
   // Client-side reset command
   if (input.trim() === '/c') {

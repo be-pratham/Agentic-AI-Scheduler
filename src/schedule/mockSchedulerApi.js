@@ -4,7 +4,6 @@ let userData = { wakeTime: '', focus: '', habit: '' };
 export const mockSchedulerApi = async (input, currentSchedule = []) => {
   const query = input.toLowerCase();
   
-  // No "Thinking" delay for the very first command
   if (query === 'start' || query === 'plan my day') {
     currentStep = 'AWAITING_WAKE';
     return {
@@ -14,25 +13,20 @@ export const mockSchedulerApi = async (input, currentSchedule = []) => {
     };
   }
 
-  // Simulate thinking for all subsequent reasoning
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  // --- SCENARIO: EDIT / CHANGE FEATURE ---
   if (query.includes("change") || query.includes("move") || query.includes("to")) {
-    // Basic NLP extraction (Example: "change Morning Routine to 10am")
     const newTimeMatch = query.match(/(\d+)(am|pm)/);
     
     if (newTimeMatch) {
       const newTime = newTimeMatch[0].toUpperCase();
       const updatedSchedule = currentSchedule.map(item => {
-        // Find if the user mentioned a specific activity in the query
         if (query.includes(item.activity.toLowerCase())) {
           return { ...item, time: newTime };
         }
         return item;
       });
 
-      // Conflict Check: Is there another task at this new time?
       const conflict = currentSchedule.find(item => 
         item.time.replace(/\s/g, '').toLowerCase() === newTime.toLowerCase()
       );
@@ -53,7 +47,6 @@ export const mockSchedulerApi = async (input, currentSchedule = []) => {
     }
   }
 
-  // --- SCENARIO: SEQUENTIAL QUESTIONS ---
   if (currentStep === 'AWAITING_WAKE') {
     userData.wakeTime = input;
     currentStep = 'AWAITING_FOCUS';

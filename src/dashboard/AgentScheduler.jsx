@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Calendar, Clock, Trash2, CheckCircle2, Zap, Loader2, RotateCcw } from 'lucide-react';
-// IMPORTING THE N8N SERVICE
 import { callN8nAgent } from '../schedule/n8n'; 
 
 const AgentScheduler = () => {
@@ -11,8 +10,6 @@ const AgentScheduler = () => {
   const [isThinking, setIsThinking] = useState(false);
   const [schedule, setSchedule] = useState([]);
   const chatEndRef = useRef(null);
-
-  // Auto-scroll
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isThinking]);
@@ -24,10 +21,8 @@ const AgentScheduler = () => {
     const userQuery = input;
     setInput('');
 
-    // OPTIMISTIC UPDATE: Show user message immediately
     setMessages(prev => [...prev, { role: 'user', content: userQuery }]);
 
-    // RESET LOGIC: If user types /c, clear everything immediately
     if (userQuery.trim() === '/c') {
       setMessages([{ role: 'assistant', content: 'Conversation and schedule cleared. Let\'s start over. What time do you wake up?' }]);
       setSchedule([]);
@@ -37,17 +32,13 @@ const AgentScheduler = () => {
     setIsThinking(true);
 
     try {
-      // Call n8n with history context
       const response = await callN8nAgent(userQuery, schedule, messages);
 
-      // Handle the response
       if (response.agent_status === 'reset') {
-        // Fallback if the service triggers a reset
         setSchedule([]);
         setMessages([{ role: 'assistant', content: response.message }]);
       } else {
         setMessages(prev => [...prev, { role: 'assistant', content: response.message }]);
-        // Only update schedule if the Agent actually returned one
         if (response.generated_schedule && response.generated_schedule.length > 0) {
           setSchedule(response.generated_schedule);
         }
@@ -64,9 +55,7 @@ const AgentScheduler = () => {
   };
 
   return (
-    // MAIN CONTAINER: Changed to dark background and light text
     <div className="flex h-screen bg-slate-950 font-sans text-slate-100">
-      
       {/* Left Panel - Chat */}
       <div className="w-1/3 flex flex-col border-r border-slate-800 bg-slate-900 shadow-xl">
         <div className="p-6 border-b border-slate-800 flex items-center justify-between">
@@ -112,7 +101,7 @@ const AgentScheduler = () => {
         </form>
       </div>
 
-      {/* Right Panel - Artifact */}
+      {/* Right Panel*/}
       <div className="flex-1 bg-slate-950 p-8 overflow-y-auto">
          <h2 className="text-3xl font-bold text-slate-100 mb-8">Live Schedule</h2>
          <div className="space-y-4">
@@ -150,4 +139,5 @@ const AgentScheduler = () => {
     </div>
   );
 };
+
 export default AgentScheduler;

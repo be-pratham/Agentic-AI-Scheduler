@@ -1,7 +1,6 @@
 const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_URL;
 
 export const callN8nAgent = async (input, currentSchedule = [], conversationHistory = []) => {
-  // Client-side reset command
   if (input.trim() === '/c') {
     return {
       agent_status: "reset",
@@ -24,10 +23,8 @@ export const callN8nAgent = async (input, currentSchedule = [], conversationHist
     if (!response.ok) throw new Error(`n8n HTTP Error: ${response.status}`);
 
     const textData = await response.text();
-    console.log("RAW N8N RESPONSE:", textData); // <--- Check your Browser Console for this!
+    console.log("RAW N8N RESPONSE:", textData);
 
-    // --- THE NUCLEAR PARSER ---
-    // This finds the JSON object buried inside ANY text
     const jsonStart = textData.indexOf('{');
     const jsonEnd = textData.lastIndexOf('}');
 
@@ -38,20 +35,16 @@ export const callN8nAgent = async (input, currentSchedule = [], conversationHist
     const cleanJsonString = textData.substring(jsonStart, jsonEnd + 1);
     const data = JSON.parse(cleanJsonString);
 
-    // --- NEW FIX: UNWRAP DOUBLE-ENCODED JSON ---
-    // If n8n nested the real JSON inside a "text" string, extract and parse it
     if (data.text && typeof data.text === 'string') {
       const innerStart = data.text.indexOf('{');
       const innerEnd = data.text.lastIndexOf('}');
       
       if (innerStart !== -1 && innerEnd !== -1) {
          const cleanInner = data.text.substring(innerStart, innerEnd + 1);
-         return JSON.parse(cleanInner); // Returns the actual inner data
+         return JSON.parse(cleanInner);
       }
     }
-    // --------------------------
-
-    return data; // Returns normal data if it wasn't double-wrapped
+    return data;
 
   } catch (error) {
     console.error("Agent Parsing Error:", error);
